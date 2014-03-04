@@ -19,6 +19,10 @@ getHomeR = defaultLayout $ do
   setTitle "File Processor"
   toWidget [whamlet|
 <h2>Previously submitted files
+<ul>
+  <li>readme.txt
+  <li>report.pdf
+  <li>music.wav
 |]
 
 
