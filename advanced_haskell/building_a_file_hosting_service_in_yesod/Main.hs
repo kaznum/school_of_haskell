@@ -16,9 +16,10 @@ mkYesod "App" [parseRoutes|
 
 getHomeR :: Handler Html
 getHomeR = defaultLayout $ do
-  let filename1 = "readme.txt" :: String
-      filename2 = "report.pdf" :: String
-      filename3 = "music.wav" :: String
+--  let filename1 = "readme.txt" :: String
+--      filename2 = "report.pdf" :: String
+--      filename3 = "music.wav" :: String
+  let filenames = ["readme.txt", "report.pdf", "music.wav"] :: [String]
   setTitle "File Processor"
   toWidget [whamlet|
 <h2>Previously submitted files
@@ -26,9 +27,11 @@ getHomeR = defaultLayout $ do
 $#  <li>readme.txt
 $#  <li>report.pdf
 $#  <li>music.wav
-  <li>#{filename1}
-  <li>#{filename2}
-  <li>#{filename3}
+$#  <li>#{filename1}
+$#  <li>#{filename2}
+$#  <li>#{filename3}
+  $forall filename <- filenames
+    <li>#{filename}
 |]
 
 
