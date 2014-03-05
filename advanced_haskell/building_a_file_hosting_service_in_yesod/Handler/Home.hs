@@ -3,6 +3,9 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Handler.Home where
+
+import Data.Conduit
+import Data.Conduit.Binary
 import Data.Default
 import Yesod
 import Yesod.Default.Util
@@ -23,7 +26,8 @@ postHomeR = do
   case result of
     FormSuccess fi -> do
       app <- getYesod
-      addFile app $ fileName fi
+      fileBytes <- runResourceT $ fileSource fi $$ sinkLbs
+      addFile app (fileName fi, fileBytes)
     _ -> return ()
   redirect HomeR
 
