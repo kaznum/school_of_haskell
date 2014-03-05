@@ -8,6 +8,8 @@ module Foundation where
 import Control.Concurrent.STM
 import Data.ByteString.Lazy (ByteString)
 import Data.Default
+import Data.IntMap (IntMap)
+import qualified Data.IntMap as IntMap
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Text.Hamlet
@@ -15,7 +17,7 @@ import Yesod
 import Yesod.Default.Util
 
 data StoredFile = StoredFile !Text !ByteString
-type Store = [(Int, StoredFile)]
+type Store = IntMap StoredFile
 data App = App (TVar Int) (TVar Store)
 
 instance Yesod App where
@@ -37,20 +39,19 @@ getNextId (App tnextId _) = do
 getList :: Handler [(Int, StoredFile)]
 getList = do
   App _ tstore <- getYesod
-  liftIO $ readTVarIO tstore
+  store <- liftIO $ readTVarIO tstore
+  return $ IntMap.toList store
 
 addFile :: App -> StoredFile -> Handler ()
 addFile app@(App _ tstore) file =
   liftIO . atomically $ do
     ident <- getNextId app
-    modifyTVar tstore $ \ files -> (ident, file) : files
-
-
+    modifyTVar tstore $ IntMap.insert ident file
 
 getById :: Int -> Handler StoredFile
 getById ident = do
   App _ tstore <- getYesod
-  operations <- liftIO $ readTVarIO tstore
-  case lookup ident operations of
+  store <- liftIO $ readTVarIO tstore
+  case IntMap.lookup ident store of
     Nothing -> notFound
     Just file -> return file
