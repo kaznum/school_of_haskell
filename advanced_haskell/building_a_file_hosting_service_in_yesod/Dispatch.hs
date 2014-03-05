@@ -9,6 +9,7 @@ import Yesod
 import Yesod.Default.Util
 
 import Foundation
+import Handler.Download
 import Handler.Home
 import Handler.Preview
 
