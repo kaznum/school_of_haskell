@@ -8,6 +8,8 @@ module Foundation where
 import Control.Concurrent.STM
 import Data.ByteString.Lazy (ByteString)
 import Data.Text (Text)
+import qualified Data.Text as Text
+
 
 import Yesod
 
@@ -29,3 +31,11 @@ addFile :: App -> (Text, ByteString) -> Handler ()
 addFile (App tstore) op =
   liftIO . atomically $ do
     modifyTVar tstore $ \ ops -> op : ops
+
+getById :: Text -> Handler ByteString
+getById ident = do
+  App tstore <- getYesod
+  operations <- liftIO $ readTVarIO tstore
+  case lookup ident operations of
+    Nothing -> notFound
+    Just bytes -> return bytes

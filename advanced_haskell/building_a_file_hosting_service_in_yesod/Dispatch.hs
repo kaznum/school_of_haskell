@@ -10,13 +10,6 @@ import Yesod.Default.Util
 
 import Foundation
 import Handler.Home
+import Handler.Preview
 
 mkYesodDispatch "App" resourcesApp
-
--- getHomeR :: Handler Html
--- getHomeR = do
---   let filenames = ["readme.txt", "report.pdf", "music.wav"] :: [String]
---   defaultLayout $ do
---     setTitle "File Processor"
---     $(widgetFileNoReload def "home")
-
