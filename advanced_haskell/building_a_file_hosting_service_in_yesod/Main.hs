@@ -10,5 +10,6 @@ import Foundation
 
 main :: IO ()
 main = do
-  tfilenames <- atomically $ newTVar []
-  warpEnv $ App tfilenames
+  tstore <- atomically $ newTVar []
+  tident <- atomically $ newTVar 0
+  warpEnv $ App tident tstore

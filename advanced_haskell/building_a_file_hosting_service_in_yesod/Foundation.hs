@@ -14,7 +14,10 @@ import Text.Hamlet
 import Yesod
 import Yesod.Default.Util
 
-data App = App (TVar [(Text, ByteString)])
+data StoredFile = StoredFile !Text !ByteString
+type Store = [(Int, StoredFile)]
+data App = App (TVar Int) (TVar Store)
+
 instance Yesod App where
   defaultLayout widget = do
     pc <- widgetToPageContent $ $(widgetFileNoReload def "default-layout")
@@ -25,21 +28,29 @@ instance RenderMessage App FormMessage where
 
 mkYesodData "App" $(parseRoutesFile "config/routes")
 
-getList :: Handler [Text]
+getNextId :: App -> STM Int
+getNextId (App tnextId _) = do
+  nextId <- readTVar tnextId
+  writeTVar tnextId $ nextId + 1
+  return nextId
+
+getList :: Handler [(Int, StoredFile)]
 getList = do
-  App tstate <- getYesod
-  state <- liftIO $ readTVarIO tstate
-  return $ map fst state
+  App _ tstore <- getYesod
+  liftIO $ readTVarIO tstore
 
-addFile :: App -> (Text, ByteString) -> Handler ()
-addFile (App tstore) op =
+addFile :: App -> StoredFile -> Handler ()
+addFile app@(App _ tstore) file =
   liftIO . atomically $ do
-    modifyTVar tstore $ \ ops -> op : ops
+    ident <- getNextId app
+    modifyTVar tstore $ \ files -> (ident, file) : files
 
-getById :: Text -> Handler ByteString
+
+
+getById :: Int -> Handler StoredFile
 getById ident = do
-  App tstore <- getYesod
+  App _ tstore <- getYesod
   operations <- liftIO $ readTVarIO tstore
   case lookup ident operations of
     Nothing -> notFound
-    Just bytes -> return bytes
+    Just file -> return file
