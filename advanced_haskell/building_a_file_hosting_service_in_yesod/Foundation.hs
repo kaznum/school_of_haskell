@@ -16,7 +16,7 @@ import Text.Hamlet
 import Yesod
 import Yesod.Default.Util
 
-data StoredFile = StoredFile !Text !ByteString
+data StoredFile = StoredFile !Text !Text !ByteString
 type Store = IntMap StoredFile
 data App = App (TVar Int) (TVar Store)
 
